@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/">
+        <file>AccountInformation.qml</file>
+        <file>ChangeNickname.qml</file>
+        <file>ChangePassword.qml</file>
+        <file>CommentManger.qml</file>
+        <file>Dialogs.qml</file>
+        <file>EditManuscript.qml</file>
+        <file>FullScreen.qml</file>
+        <file>HomePage.qml</file>
+        <file>LoginPage.qml</file>
+        <file>main.qml</file>
+        <file>MainPage.qml</file>
+        <file>ManuscriptPage.qml</file>
+        <file>MessageDialogs.qml</file>
+        <file>MyFriend.qml</file>
+        <file>PersonalPage.qml</file>
+        <file>PublishPage.qml</file>
+        <file>QmlBusyIndicator.qml</file>
+        <file>RegisterPage.qml</file>
+        <file>SettingPage.qml</file>
+        <file>TimeDialog.qml</file>
+        <file>WatchVideo.qml</file>
+    </qresource>
+</RCC>
