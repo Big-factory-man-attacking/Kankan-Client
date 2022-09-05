@@ -29,12 +29,12 @@ Item {
     //获取数据
     function getVideoInfo() {
         videoModel.clear()
-        videoUrlModel.clear()
         for (var i = 0; i < manuscripts["manuscriptInfo"].length; i += 7) {
+            let grid = []
             for (var j = i+1; j < i+7 && j < manuscripts["manuscriptInfo"].length; j++) {
-                videoUrlModel.append({videoUrl: manuscripts["manuscriptInfo"][j]["videoAddress"], videoCover: manuscripts["manuscriptInfo"][j]["cover"], playNum: "435", commentNum: "5464", duration: "1:30", videoTitle: manuscripts["manuscriptInfo"][j]["title"], authorName: manuscripts["netizenInfo"][j]["nickname"]})
+                grid.push({videoUrl: manuscripts["manuscriptInfo"][j]["videoAddress"], videoCover: manuscripts["manuscriptInfo"][j]["cover"], playNum: "435", commentNum: "5464", duration: "1:30", videoTitle: manuscripts["manuscriptInfo"][j]["title"], authorName: manuscripts["netizenInfo"][j]["nickname"]})
             }
-            videoModel.append({bigVideoUrl: manuscripts["manuscriptInfo"][i]["videoAddress"], bigVideoCover: manuscripts["manuscriptInfo"][i]["cover"], videoUrls: videoUrlModel, playNum: "435", commentNum: "5464", duration: "1:30", videoTitle: manuscripts["manuscriptInfo"][i]["title"]});
+            videoModel.append({bigVideoUrl: manuscripts["manuscriptInfo"][i]["videoAddress"], bigVideoCover: manuscripts["manuscriptInfo"][i]["cover"], videoUrls: grid, playNum: "435", commentNum: "5464", duration: "1:30", videoTitle: manuscripts["manuscriptInfo"][i]["title"]});
         }
     }
 
@@ -207,202 +207,221 @@ Item {
 
     Component {
         id: contactDelegate
-        ColumnLayout {
+        Rectangle {
             width: videoListView.width
-            spacing: 0
-            Image {
-                id: bigVideoCoverI
-                Layout.preferredWidth: parent.width-20
-                Layout.preferredHeight: parent.width/16*9
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 10
-                fillMode: Image.PreserveAspectCrop
-                source: bigVideoCover
-                RowLayout {
-                    width: parent.width-10
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.margins: 5
-                    spacing: 8
-                    Row {
-                        Layout.alignment: Qt.AlignLeft
-                        spacing: 1
-                        Button {
-                            icon.source: "qrc:video_white.png"
-                            icon.width: 18
-                            icon.height: 18
-                            background: Rectangle {
-                                opacity: 0
-                            }
-                        }
-                        Text {
-                            width: 30
-                            text: playNum
-                            color: "white"
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                        Button {
-                            icon.source: "qrc:comment_white.png"
-                            icon.width: 16
-                            icon.height: 16
-                            background: Rectangle {
-                                opacity: 0
-                            }
-                        }
-                        Text {
-                            text: playNum
-                            color: "white"
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-                    Text {
-                        text: duration
-                        color: "white"
-                        Layout.alignment: Qt.AlignRight
-                    }
-                }
-                TapHandler {
-                    onTapped: {
-                        var flag = isFocus(manuscripts["netizenInfo"][index*7]["id"])
-                        stackView.push(watchVideo, {videoSource: bigVideoUrl, manuscript: manuscripts["manuscriptInfo"][index*7], netizen: manuscripts["netizenInfo"][index*7], flag: flag})
-                        mainPage.visible = false
-                        stackView.visible = true
-                    }
-                }
-            }
-            Rectangle {
-                id: titleRec
-                color: "white"
-                Layout.preferredWidth: parent.width-20
-                Layout.preferredHeight: bigVideoTitleT.height+10
-                Layout.alignment: Qt.AlignHCenter
-                Text {
-                    id: bigVideoTitleT
-                    width: parent.width-20
-                    height: 40
-                    anchors.centerIn: parent
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: videoTitle
-                    wrapMode: Text.WordWrap
-                    elide: Text.ElideRight
-                }
-            }
-            GridView {
-                id: videoView
-                Layout.preferredWidth: parent.width-10
-                Layout.preferredHeight: cellHeight*count/2
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 10
-                cellWidth: width/2
-                cellHeight: 195
-                interactive: false
-                model: videoUrls
-                delegate: Rectangle {
-                    width: videoView.cellWidth
-                    height: videoView.cellHeight
-                    color: "#f2f2f2"
-                    Image {
-                        id: videoCoverI
-                        source: videoCover
+            height: 870
+            color: "#f2f2f2"
+            ColumnLayout {
+                width: videoListView.width
+                spacing: 0
+                Image {
+                    id: bigVideoCoverI
+                    Layout.preferredWidth: parent.width-20
+                    Layout.preferredHeight: parent.width/16*9
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: 10
+                    fillMode: Image.PreserveAspectCrop
+                    source: bigVideoCover
+                    RowLayout {
                         width: parent.width-10
-                        height: width/16*9
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        fillMode: Image.PreserveAspectCrop
-                        RowLayout {
-                            width: parent.width-10
-                            anchors.bottom: parent.bottom
-                            anchors.left: parent.left
-                            anchors.margins: 5
-                            spacing: 8
-                            Row {
-                                Layout.alignment: Qt.AlignLeft
-                                spacing: 1
-                                Button {
-                                    icon.source: "qrc:video_white.png"
-                                    icon.width: 18
-                                    icon.height: 18
-                                    background: Rectangle {
-                                        opacity: 0
-                                    }
-                                }
-                                Text {
-                                    width: 30
-                                    text: playNum
-                                    color: "white"
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                                Button {
-                                    icon.source: "qrc:comment_white.png"
-                                    icon.width: 16
-                                    icon.height: 16
-                                    background: Rectangle {
-                                        opacity: 0
-                                    }
-                                }
-                                Text {
-                                    text: commentNum
-                                    color: "white"
-                                    anchors.verticalCenter: parent.verticalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.margins: 5
+                        spacing: 8
+                        Row {
+                            Layout.alignment: Qt.AlignLeft
+                            spacing: 1
+                            Button {
+                                icon.source: "qrc:video_white.png"
+                                icon.width: 18
+                                icon.height: 18
+                                background: Rectangle {
+                                    opacity: 0
                                 }
                             }
                             Text {
-                                text: duration
+                                width: 30
+                                text: playNum
                                 color: "white"
-                                Layout.alignment: Qt.AlignRight
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                            Button {
+                                icon.source: "qrc:comment_white.png"
+                                icon.width: 16
+                                icon.height: 16
+                                background: Rectangle {
+                                    opacity: 0
+                                }
+                            }
+                            Text {
+                                text: playNum
+                                color: "white"
+                                anchors.verticalCenter: parent.verticalCenter
                             }
                         }
-                        TapHandler {
-                            onTapped: {
-                                var flag = isFocus(manuscripts["netizenInfo"][index+1]["id"])
-                                stackView.push(watchVideo, {videoSource: videoUrl, manuscript: manuscripts["manuscriptInfo"][index+1], netizen: manuscripts["netizenInfo"][index+1], flag: flag})
+                        Text {
+                            text: duration
+                            color: "white"
+                            Layout.alignment: Qt.AlignRight
+                        }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            var flag = isFocus(manuscripts["netizenInfo"][videoListView.currentIndex*7]["id"])
+                            stackView.push(watchVideo, {videoSource: bigVideoUrl, manuscript: manuscripts["manuscriptInfo"][videoListView.currentIndex*7], netizen: manuscripts["netizenInfo"][videoListView.currentIndex*7], flag: flag})
+                            mainPage.visible = false
+                            stackView.visible = true
+                        }
+                    }
+                }
+                Rectangle {
+                    id: titleRec
+                    color: "white"
+                    Layout.preferredWidth: parent.width-20
+                    Layout.preferredHeight: bigVideoTitleT.height+10
+                    Layout.alignment: Qt.AlignHCenter
+                    Text {
+                        id: bigVideoTitleT
+                        width: parent.width-20
+                        height: 40
+                        anchors.centerIn: parent
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: videoTitle
+                        wrapMode: Text.WordWrap
+                        elide: Text.ElideRight
+                    }
+                }
+                GridView {
+                    id: videoView
+                    Layout.preferredWidth: parent.width-10
+                    Layout.preferredHeight: cellHeight*count/2
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: 10
+                    cellWidth: width/2
+                    cellHeight: 195
+                    interactive: false
+                    model: videoUrls
+                    delegate: Rectangle {
+                        width: videoView.cellWidth
+                        height: videoView.cellHeight
+                        color: "#f2f2f2"
+                        Image {
+                            id: videoCoverI
+                            source: videoCover
+                            width: parent.width-10
+                            height: width/16*9
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            fillMode: Image.PreserveAspectCrop
+                            RowLayout {
+                                width: parent.width-10
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
+                                anchors.margins: 5
+                                spacing: 8
+                                Row {
+                                    Layout.alignment: Qt.AlignLeft
+                                    spacing: 1
+                                    Button {
+                                        icon.source: "qrc:video_white.png"
+                                        icon.width: 18
+                                        icon.height: 18
+                                        background: Rectangle {
+                                            opacity: 0
+                                        }
+                                    }
+                                    Text {
+                                        width: 30
+                                        text: playNum
+                                        color: "white"
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    Button {
+                                        icon.source: "qrc:comment_white.png"
+                                        icon.width: 16
+                                        icon.height: 16
+                                        background: Rectangle {
+                                            opacity: 0
+                                        }
+                                    }
+                                    Text {
+                                        text: commentNum
+                                        color: "white"
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                }
+                                Text {
+                                    text: duration
+                                    color: "white"
+                                    Layout.alignment: Qt.AlignRight
+                                }
+                            }
+                        }
+                        Rectangle {
+                            color: "white"
+                            width: parent.width-10
+                            height: 80
+                            anchors.top: videoCoverI.bottom
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            Text {
+                                id: videoTitleT
+                                width: parent.width-20
+                                height: 40
+                                anchors.top: parent.top
+                                anchors.topMargin: 5
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: videoTitle
+                                wrapMode: Text.WordWrap
+                                elide: Text.ElideRight
+                            }
+                            Rectangle {
+                                id: authorLabel
+                                width: authorText.width+4
+                                height: authorText.height+4
+                                anchors.top: videoTitleT.bottom
+                                anchors.topMargin: 5
+                                anchors.left: parent.left
+                                anchors.leftMargin: 10
+                                border.color: "#cccccc"
+                                border.width: 1
+                                radius: 3
+                                Text {
+                                    id: authorText
+                                    text: qsTr("作者")
+                                    color: "#cccccc"
+                                    anchors.centerIn: parent
+                                }
+                            }
+                            Text {
+                                text: authorName
+                                anchors.left: authorLabel.right
+                                anchors.leftMargin: 5
+                                anchors.top: videoTitleT.bottom
+                                anchors.topMargin: 5
+                            }
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                console.log("grid view index:-------" + index)
+                                videoView.currentIndex = index
+                                var i = videoListView.currentIndex*7+videoView.currentIndex+1
+                                var flag = isFocus(manuscripts["netizenInfo"][i]["id"])
+                                stackView.push(watchVideo, {videoSource: videoUrl, manuscript: manuscripts["manuscriptInfo"][i], netizen: manuscripts["netizenInfo"][i], flag: flag})
                                 mainPage.visible = false
                                 stackView.visible = true
                             }
                         }
                     }
-                    Rectangle {
-                        color: "white"
-                        width: parent.width-10
-                        height: 80
-                        anchors.top: videoCoverI.bottom
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        Text {
-                            id: videoTitleT
-                            width: parent.width-20
-                            height: 40
-                            anchors.top: parent.top
-                            anchors.topMargin: 5
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: videoTitle
-                            wrapMode: Text.WordWrap
-                            elide: Text.ElideRight
-                        }
-                        Rectangle {
-                            id: authorLabel
-                            width: authorText.width+4
-                            height: authorText.height+4
-                            anchors.top: videoTitleT.bottom
-                            anchors.topMargin: 5
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            border.color: "#cccccc"
-                            border.width: 1
-                            radius: 3
-                            Text {
-                                id: authorText
-                                text: qsTr("作者")
-                                color: "#cccccc"
-                                anchors.centerIn: parent
-                            }
-                        }
-                        Text {
-                            text: authorName
-                            anchors.left: authorLabel.right
-                            anchors.leftMargin: 5
-                            anchors.top: videoTitleT.bottom
-                            anchors.topMargin: 5
-                        }
-                    }
+                }
+            }
+            MouseArea {
+                anchors.fill: parent
+                propagateComposedEvents: true
+                onClicked: {
+                    videoListView.currentIndex = index
+                    mouse.accepted = false
+                    console.log("list view index:---------" + index)
                 }
             }
         }
@@ -410,9 +429,6 @@ Item {
 
     ListModel {
         id: videoModel
-    }
-    ListModel {
-        id: videoUrlModel
     }
 
 
