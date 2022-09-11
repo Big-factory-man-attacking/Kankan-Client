@@ -16,6 +16,7 @@ resources.files = qml/main.qml \
     qml/ChangePassword.qml \
     qml/CommentManger.qml \
     qml/Dialogs.qml \
+    qml/Delegate.qml\
     qml/EditManuscript.qml \
     qml/FullScreen.qml \
     qml/HomePage.qml \
@@ -56,6 +57,7 @@ DISTFILES += \
     qml/ChangeNickname.qml \
     qml/ChangePassword.qml \
     qml/CommentManger.qml \
+    qml/Delegate.qml \
     qml/Dialogs.qml \
     qml/EditManuscript.qml \
     qml/FullScreen.qml \

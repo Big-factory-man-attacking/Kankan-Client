@@ -18,9 +18,38 @@ Rectangle {
 
     function getComment() {
         commentModel.clear()
+        var id = mainPage.personalPage.netizen["id"]
         for (var i = 0; i < manuscript["comments"].length; i++) {
-            commentModel.append({headSource: "qrc:head_portrait.png", nickname: "吃瓜的快乐", comment: manuscript["comments"][i]["text"], commentDate: new Date()});
+            var res = false
+            if (manuscript["comments"][i]["netizenInfo"]["id"] === id) {
+                res = true
+            }
+            commentModel.append({isAuthor: res, headSource: manuscript["comments"][i]["netizenInfo"]["headPortrait"], nickname: manuscript["comments"][i]["netizenInfo"]["nickname"], comment: manuscript["comments"][i]["text"], commentDate: new Date()});
         }
+    }
+
+    function addComment() {
+        if (editText.length !== 0) {
+            videoSocialControl.commentManuscript(mainPage.personalPage.netizen["id"], manuscript["id"], editText.text)
+            init()
+        }
+        editText.clear()
+    }
+
+    function init() {
+        //重新加载当前稿件
+        manuscript = videoSocialControl.loadVideo(manuscript["id"])
+        //重新加载评论
+        getComment()
+
+        //重新加载主页数据
+        for (var i = 0; i < mainPage.homePage.manuscripts["manuscriptInfo"].length; i++) {
+            if (mainPage.homePage.manuscripts["manuscriptInfo"][i]["id"] === manuscript["id"]) {
+                mainPage.homePage.manuscripts["manuscriptInfo"][i] = manuscript
+                break;
+            }
+        }
+        mainPage.homePage.getVideoInfo()
     }
 
     //时间转化   "00:00:00"
@@ -331,6 +360,7 @@ Rectangle {
         }
     }
     StackLayout {
+        id: stack
         width: parent.width
         height: parent.height-videoRec.height-tabBar.height-1
         anchors.top: toolS.bottom
@@ -577,7 +607,7 @@ Rectangle {
                         id: commentView
                         anchors.fill: parent
                         model: commentModel
-                        delegate: commentDelegate
+                        delegate: Delegate{}
                         boundsBehavior: Flickable.StopAtBounds
                     }
                 }
@@ -627,92 +657,18 @@ Rectangle {
                         }
                         onClicked: {
                             //为当前稿件添加一条评论
+                            addComment();
                         }
                     }
                 }
             }
-
-
         }
     }
-    Component {
-        id: commentDelegate
-        ColumnLayout {
-            width: commentView.width
-            spacing: 10
-            Row {
-                width: parent.width-20
-                spacing: 10
-                Layout.topMargin: 8
-                Layout.alignment: Qt.AlignHCenter
-                Rectangle {
-                    id: headPortrait
-                    height: 40
-                    width: 40
-                    radius: width/2
-                    border.width: 1
-                    border.color: "#707070"
-                    Image {
-                        id: image
-                        smooth: true
-                        visible: false
-                        anchors.fill: parent
-                        source: headSource
-                        antialiasing: true
-                    }
-                    Rectangle {
-                        id: mask
-                        anchors.fill: parent
-                        radius: width/2
-                        visible: false
-                        antialiasing: true
-                        smooth: true
-                    }
-                    OpacityMask {
-                        id:mask_image
-                        anchors.fill: image
-                        source: image
-                        maskSource: mask
-                        visible: true
-                        antialiasing: true
-                    }
-                }
-                ColumnLayout {
-                    spacing: 5
-                    width: parent.width-headPortrait.width-10
-                    Layout.alignment: Qt.AlignVCenter
-                    Text {
-                        text: nickname
-                        color: "grey"
-                        font.pixelSize: 14
-                    }
-                    Text {
-                        text: Qt.formatDateTime(commentDate, "yyyy-MM-dd hh:mm")
-                        color: "grey"
-                        font.pixelSize: 12
-                    }
-                    Text {
-                        Layout.preferredWidth: parent.width-10
-                        Layout.topMargin: 5
-                        text: comment
-                        font.pixelSize: 16
-                        wrapMode: Text.WrapAnywhere
-                    }
-                }
-            }
-            ToolSeparator {
-                Layout.preferredHeight: 1
-                Layout.preferredWidth: parent.width
-                contentItem: Rectangle{
-                    anchors.fill: parent
-                    color: "#cccccc"
-                }
-            }
-        }
-    }
+
     ListModel {
         id: commentModel
     }
+
     Component {
         id: videoDelegate
         ColumnLayout {
@@ -933,6 +889,57 @@ Rectangle {
             authorName: "忽而今夏"
             playNum: "123"
             commentNum: "3345"
+        }
+    }
+
+    Rectangle {
+        id: deleteRec
+        width: parent.width
+        height: 110
+        anchors.bottom: parent.bottom
+        visible: false
+        color: "#f2f2f2"
+        Button {
+            width: parent.width
+            height: 50
+            anchors.top: parent.top
+            Row {
+                spacing: 10
+                anchors.centerIn: parent
+                Image {
+                    source: "qrc:delete.png"
+                    sourceSize: Qt.size(20, 20)
+                }
+                Text {
+                    text: qsTr("删除")
+                    font.pixelSize: 16
+                }
+            }
+            background: Rectangle{
+                color: "white"
+            }
+            onClicked: {
+                videoSocialControl.deleteComment(manuscript["id"], manuscript["comments"][commentView.currentIndex]["id"])
+                init()
+                deleteRec.visible = false
+            }
+        }
+
+        Button {
+            width: parent.width
+            height: 50
+            anchors.bottom: parent.bottom
+            Text {
+                text: qsTr("取消")
+                font.pixelSize: 16
+                anchors.centerIn: parent
+            }
+            background: Rectangle{
+                color: "white"
+            }
+            onClicked: {
+                deleteRec.visible = false
+            }
         }
     }
 

@@ -88,7 +88,7 @@ QJsonObject VideoSocialControl::getSomeVideos()
     return transition(js);
 }
 
-nlohmann::json VideoSocialControl::loadVideo(QString id)
+QJsonObject VideoSocialControl::loadVideo(QString id)
 {
     nlohmann::json js;
     js["type"] = "loadVideo";
@@ -97,6 +97,9 @@ nlohmann::json VideoSocialControl::loadVideo(QString id)
     js["data"] = data;
 
     m_socket.send(js);
+
+    js = m_socket.receive();
+    return transition(js);
 }
 
 std::pair<std::string, std::string> VideoSocialControl::mergeVideoFiles(std::vector<std::string> videoFiles)
@@ -322,6 +325,33 @@ void VideoSocialControl::deleteManuscript(const QString &netizenId, const QStrin
     nlohmann::json data;
     data["netizenId"] = netizenId.toStdString();
     data["manuscriptId"] = manuscriptId.toStdString();
+    js["data"] = data;
+
+    m_socket.send(js);
+}
+
+void VideoSocialControl::commentManuscript(const QString &netizenId, const QString &manuscriptId, QString &text)
+{
+    nlohmann::json js;
+    js["type"] = "commentManuscript";
+
+    nlohmann::json data;
+    data["netizenId"] = netizenId.toStdString();
+    data["manuscriptId"] = manuscriptId.toStdString();
+    data["text"] = text.toStdString();
+    js["data"] = data;
+
+    m_socket.send(js);
+}
+
+void VideoSocialControl::deleteComment(const QString &manuscriptId, const QString &commentId)
+{
+    nlohmann::json js;
+    js["type"] = "deleteComment";
+
+    nlohmann::json data;
+    data["manuscriptId"] = manuscriptId.toStdString();
+    data["commentId"] = commentId.toStdString();
     js["data"] = data;
 
     m_socket.send(js);

@@ -33,7 +33,7 @@ public:
     Q_INVOKABLE QJsonObject getSomeVideos();
 
     // 用户选择了某个稿件进行观看，加载稿件的完整信息
-    Q_INVOKABLE nlohmann::json loadVideo(QString id);
+    Q_INVOKABLE QJsonObject loadVideo(QString id);
 
     // 合并视频,返回id、合并后的视频路径
     std::pair<std::string, std::string> mergeVideoFiles(std::vector<std::string> videoFiles);
@@ -73,6 +73,10 @@ public:
 
     // 删除稿件
     Q_INVOKABLE void deleteManuscript(const QString& netizenId, const QString& manuscriptId);
+
+    Q_INVOKABLE void commentManuscript(const QString& netizenId, const QString& manuscriptId, QString& text);
+
+    Q_INVOKABLE void deleteComment(const QString& manuscriptId, const QString& commentId);
 
 private:
     TcpSocket m_socket;

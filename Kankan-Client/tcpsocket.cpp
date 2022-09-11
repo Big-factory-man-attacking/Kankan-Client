@@ -15,7 +15,7 @@ extern "C" {
     #include <stdio.h>
     #include <stdlib.h>
 }
-#define MAXSIZE 2048
+#define MAXSIZE 1024
 
 
 
@@ -58,18 +58,6 @@ nlohmann::json TcpSocket::receive()
     char recvline[MAXSIZE+1];
     //清空缓冲区
 
-//    for (;;) {
-//        bzero(&recvline, sizeof(recvline));
-//        int ret = recv(m_sockfd, recvline, MAXSIZE, 0);
-//        if (ret > 0) {
-//            s += recvline;
-//            std::cout << std::endl;
-//            std::cout << s << std::endl;
-//        } else {
-////            perror("read error");
-//            break;
-//        }
-//    }
     int rs = 1;
     while(rs) {
         bzero(&recvline, sizeof(recvline));
@@ -92,11 +80,8 @@ nlohmann::json TcpSocket::receive()
          else
             rs = 1;// 需要再次读取
         s += recvline;
-        std::cout << std::endl;
-        std::cout << s << std::endl;
     }
 
-    std::cout << s << std::endl;
     nlohmann::json json;
     json = nlohmann::json::parse(s);
     std::cout << "\nreceive:" << json.dump() << std::endl;
