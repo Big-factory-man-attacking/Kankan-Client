@@ -176,6 +176,17 @@ Item {
     }
     Loader {
         id: delegateLoader
-        sourceComponent: isAuthor === true ? myCommentDelegate : commentDelegate
+        sourceComponent: chooseDelegate(isAuthor)
+    }
+
+    function chooseDelegate(isAuthor) {
+        if (netizen["id"] === mainPage.personalPage.netizen["id"]) {
+            return myCommentDelegate
+        }
+        if (isAuthor === true) {
+            return myCommentDelegate
+        } else {
+            return commentDelegate
+        }
     }
 }
