@@ -208,17 +208,63 @@ std::pair<std::string, std::string> VideoSocialControl::changeVideoFile(std::vec
 
 
 
-void VideoSocialControl::createVideo(std::string description, std::string title, std::string label,
-                                     std::string subarea, bool isOriginal, std::string cover, std::string date,
-                                     std::vector<std::string> commentIds, std::string videoFileId)
+QJsonObject VideoSocialControl::publishManuscript(QString description, QString title, QString label,
+                                     QString subarea, QString isOriginal, QString cover, QString date,
+                                     QString netizenId, QString videoAddress)
 {
-    //生成Video的id
+    std::string s = videoAddress.toStdString();
+    std::string videoName;
+    for (int i = s.size()-1; i >= 0; i--) {
+        if (s[i] == '/') {
+            videoName = s.substr(i+1, s.size()-i+1);
+            std::cout << videoName << std::endl;
+            break;
+        }
+    }
+    FILE* fp;
+    if( ( fp = fopen(s.c_str(),"rb") ) == nullptr ){
+        printf("File open.\n");
+        exit(1);
+    }
+    fseek(fp, 0, SEEK_END);
+    long nlen = ftell(fp);
+    fseek(fp, 0, 0);
+    fclose(fp);
+    printf("%d\n", nlen);
 
-    //构造Video对象
+    nlohmann::json js;
+    js["type"] = "sendVideo";
+    nlohmann::json data;
+    data["videoName"] = videoName;
+    data["videoLen"] = std::to_string(nlen);
+    js["data"] = data;
+    m_socket.send(js);
+    sleep(2);
 
-    //将video对象上传到服务器
+    m_socket.sendVideo(videoAddress.toStdString());
 
-    //相关写数据库操作
+    nlohmann::json address = m_socket.receive();
+//    std::cout << address.dump(4)<< std::endl;
+
+    nlohmann::json m;
+    nlohmann::json dat;
+    m["type"] = "publishManuscript";
+
+    dat["description"] = description.toStdString();
+    dat["title"] = title.toStdString();
+    dat["label"] = label.toStdString();
+    dat["subarea"] = subarea.toStdString();
+    dat["isOriginal"] = isOriginal.toStdString();
+    dat["cover"] = cover.toStdString();
+    dat["date"] = date.toStdString();
+    dat["videoAddress"] = address["videoAddress"];
+    dat["netizenId"] = netizenId.toStdString();
+
+    m["data"] = dat;
+
+    m_socket.send(m);
+    js = m_socket.receive();
+    return transition(js);
 }
 
 void VideoSocialControl::focusOn(QString fanId, QString followerId, QString followerNickname)
@@ -288,8 +334,8 @@ bool VideoSocialControl::modifyPassword(const QString &netizenId, const QString 
 
     m_socket.send(js);
     js = m_socket.receive();
-    std::cout << js["flag"].get<std::string>() << std::endl;
-    if (js["flag"].get<std::string>() == "0") {
+    std::cout << js["flag"].get<bool>() << std::endl;
+    if (js["flag"].get<bool>() == 0) {
         return false;
     }
     //判断

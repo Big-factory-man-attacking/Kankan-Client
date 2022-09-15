@@ -43,10 +43,15 @@ Rectangle {
         getComment()
 
         //重新加载主页数据
-        for (var i = 0; i < mainPage.homePage.manuscripts["manuscriptInfo"].length; i++) {
-            if (mainPage.homePage.manuscripts["manuscriptInfo"][i]["id"] === manuscript["id"]) {
-                mainPage.homePage.manuscripts["manuscriptInfo"][i] = manuscript
+        for (var i = 0; i < mainPage.homePage.manuscripts.length; i++) {
+            if (mainPage.homePage.manuscripts[i]["manuscript"]["id"] === manuscript["id"]) {
+                mainPage.homePage.manuscripts[i]["manuscript"] = manuscript
                 break;
+            }
+        }
+        for (var j = 0; j < mainPage.personalPage.netizen["videos"].length; j++) {
+            if (mainPage.personalPage.netizen["videos"][j]["id"] === manuscript["id"]) {
+                mainPage.personalPage.netizen["videos"][j] = manuscript
             }
         }
         mainPage.homePage.getVideoInfo()
@@ -299,6 +304,11 @@ Rectangle {
                     }
                 }
             ]
+            onClicked: {
+                if (deleteRec.visible === true) {
+                    deleteRec.visible = false
+                }
+            }
         }
         TabButton {
             height: parent.height

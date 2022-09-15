@@ -6,12 +6,14 @@ import Qt5Compat.GraphicalEffects
 Rectangle {
     anchors.fill: parent
     color: "white"
+    property string manuscript_id: ""
+    property var comments: ({})
 
-    function getComment(comments) {
+    function getComment() {
         commentListModel.clear()
         for (var i = 0; i < comments.length; i++) {
             console.log("123")
-            commentListModel.append({headSource: "qrc:head_portrait.png", nickname: "吃瓜的快乐", comment: comments[i]["text"], commentDate: new Date()});
+            commentListModel.append({headSource: comments[i]["netizenInfo"]["headPortrait"], nickname: comments[i]["netizenInfo"]["nickname"], comment: comments[i]["text"], commentDate: new Date()});
         }
     }
 
@@ -155,9 +157,22 @@ Rectangle {
                     color: "white"
                 }
                 onClicked: {
-                    commentListModel.remove(commentListView.currentIndex, 1)
                     //删除该稿件中的这条评论
-
+                    videoSocialControl.deleteComment(manuscript_id, comments[index]["id"])
+                    comments.splice(index, 1)
+                    for (var i = 0; i < manuscripts.length; i++) {
+                        if (manuscripts[index]["id"] === manuscript_id) {
+                            manuscripts[index]["comments"] = comments
+                            mainPage.personalPage.netizen["videos"] = manuscripts
+                        }
+                    }
+                    for (var j = 0; j < mainPage.homePage.manuscripts.length; j++) {
+                        if (mainPage.homePage.manuscripts[j]["manuscript"]["id"] === manuscript_id) {
+                            mainPage.homePage.manuscripts[j]["manuscript"] = manuscripts[index]
+                            mainPage.homePage.getVideoInfo()
+                        }
+                    }
+                    commentListModel.remove(commentListView.currentIndex, 1)
                 }
             }
         }

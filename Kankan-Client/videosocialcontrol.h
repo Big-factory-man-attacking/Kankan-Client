@@ -42,9 +42,9 @@ public:
     std::pair<std::string, std::string> changeVideoFile(std::vector<std::string> videoFiles);
 
     // 生成稿件
-    void createVideo(std::string description, std::string title, std::string label,
-                     std::string subarea, bool isOriginal, std::string cover, std::string date,
-                     std::vector<std::string> commentIds, std::string videoFileId);
+    Q_INVOKABLE QJsonObject publishManuscript(QString description, QString title, QString label,
+                     QString subarea, QString isOriginal, QString cover, QString date,
+                     QString netizenId, QString videoAddress);
 
     // 关注
     // fanId:当前使用者id

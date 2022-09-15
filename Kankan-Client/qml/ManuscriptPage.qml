@@ -34,6 +34,9 @@ Rectangle {
                 onClicked: {
                     mainPage.bar.currentIndex = 2
                     mainPage.visible =  true
+                    if (shareRec.visible === true) {
+                        shareRec.visible = false
+                    }
                     manuscriptPage.visible = false
                 }
             }
@@ -304,8 +307,9 @@ Rectangle {
                         text: qsTr("互动")
                         radius: 5
                         onClicked: {
-                            console.log(index)
-                            commentManger.getComment(manuscripts[index]["comments"])
+                            commentManger.manuscript_id = manuscripts[index]["id"]
+                            commentManger.comments = manuscripts[index]["comments"]
+                            commentManger.getComment()
                             commentManger.visible = true
                         }
                     }
@@ -314,23 +318,22 @@ Rectangle {
                         text: qsTr("删除")
                         radius: 5
                         onClicked: {
+                            console.log(index)
+                            console.log(manuscripts[index]["id"])
                             //该稿件要删除
                             videoSocialControl.deleteManuscript(mainPage.personalPage.netizen["id"], manuscripts[index]["id"])
-                            console.log(index)
-                            mainPage.personalPage.netizen["videos"].splice(index, 1)
-                            if (index !== 0) {
-                                manuscriptListView.currentIndex = index-1
-                            } else {
-                                manuscriptListView.currentIndex = index+1
-                            }
-                            manuscriptListModel.remove(index, 1)
-                            mainPage.personalPage.getNetizenInfo()
-                            for (var i = 0; i <  mainPage.homePage.manuscripts["manuscriptInfo"].length; i++) {
-                                if (mainPage.homePage.manuscripts["manuscriptInfo"][i]["id"] === manuscripts[index]["id"]){
-                                    mainPage.homePage.manuscripts["manuscriptInfo"].splice(i, 1);
-                                    mainPage.homePage.manuscripts["netizenInfo"].splice(i, 1);
+                            for (var i = 0; i <  mainPage.homePage.manuscripts.length; i++) {
+                                var id = mainPage.homePage.manuscripts[i]["manuscript"]["id"]
+                                if (id === manuscripts[index]["id"]){
+                                    console.log(id)
+                                    mainPage.homePage.manuscripts.splice(i, 1);
                                 }
                             }
+                            mainPage.personalPage.netizen["videos"].splice(index, 1)
+                            manuscriptListModel.remove(index)
+
+                            mainPage.homePage.getVideoInfo()
+                            mainPage.personalPage.getNetizenInfo()
                         }
                     }
                 }

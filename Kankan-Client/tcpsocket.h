@@ -10,6 +10,7 @@ public:
     int getSockfd();
     int send(nlohmann::json js);
     nlohmann::json receive();
+    int sendVideo(std::string address);
 
 private:
     int m_sockfd;

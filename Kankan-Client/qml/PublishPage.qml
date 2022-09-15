@@ -201,6 +201,7 @@ Item {
                                 text: qsTr("分区：")
                             }
                             ComboBox {
+                                id: subareaBox
                                 Layout.preferredHeight: 30
                                 Layout.preferredWidth: 120
                                 editable: true
@@ -475,11 +476,34 @@ Item {
                 onClicked: {
                     //判断必须填写的信息是否填写完整
                     if (checkManscript() == true) {
-                        //传输数据给稿件构造函数
-
-                        mainPage.bar.currentIndex = 0
+                        video.pause()
                         mainPage.visible = true
                         publishPage.visible = false
+                        var isOrginal = "true"
+                        if (self_restraintButton.checked == false) {
+                            isOrginal = "false"
+                        }
+                        var cover = "https://img1.baidu.com/it/u=848097428,2094753496&fm=253&fmt=auto&app=138&f=PNG?w=838&h=500"
+
+                        //传输数据给稿件构造函数
+                        var manuscript = videoSocialControl.publishManuscript(inforTextA.text, titleText.text, labelText.text, subareaBox.displayText, isOrginal, cover, "2022-9-12", mainPage.personalPage.netizen["id"], video.source.toString().slice(7))
+                        mainPage.personalPage.netizen["videos"].push(manuscript)
+                        mainPage.personalPage.getNetizenInfo()
+                        inforTextA.text = ""
+                        titleText.text = ""
+                        labelText.text = ""
+                        subareaBox.textAt(0)
+                        self_restraintButton.checked = false
+                        self_restraintButton.checkable = true
+                        self_restraintText.color = "black"
+                        reprintButton.checked = false
+                        reprintButton.checkable = true
+                        reprintText.color = "black"
+                        video.source = ""
+                        videoCover.source = ""
+                        video.visible = false
+                        chooseVideoBut.visible = true
+                        mainPage.bar.currentIndex = 0
                     }
                 }
             }

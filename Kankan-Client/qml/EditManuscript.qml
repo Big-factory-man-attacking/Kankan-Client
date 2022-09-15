@@ -86,9 +86,9 @@ Rectangle {
                         manuscriptPage.getManuscript()
 
                         //重新获得首页视频
-                        for (var i = 0; i < mainPage.homePage.manuscripts["manuscriptInfo"].length; i++) {
-                            if (mainPage.homePage.manuscripts["manuscriptInfo"][i]["id"] === manuscript["id"]) {
-                                mainPage.homePage.manuscripts["manuscriptInfo"][i] = manuscript;
+                        for (var i = 0; i < mainPage.homePage.manuscripts.length; i++) {
+                            if (mainPage.homePage.manuscripts[i]["manuscript"]["id"] === manuscript["id"]) {
+                                mainPage.homePage.manuscripts[i]["manuscript"] = manuscript;
                             }
                         }
                         mainPage.homePage.getVideoInfo()

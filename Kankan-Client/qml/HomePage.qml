@@ -11,17 +11,19 @@ Item {
     property var manuscripts: ({})
 
     function changeNickname() {
-        for (var i = 0; i < manuscripts["netizenInfo"].length; i++) {
-            if (manuscripts["netizenInfo"][i]["id"] == mainPage.personalPage.netizen["id"]) {
-                manuscripts["netizenInfo"][i]["nickname"] = mainPage.personalPage.netizen["nickname"]
+        for (var i = 0; i < manuscripts.length; i++) {
+            if (manuscripts[i]["netizen"]["id"] === mainPage.personalPage.netizen["id"]) {
+                manuscripts[i]["netizen"]["nickname"] = mainPage.personalPage.netizen["nickname"]
+                getVideoInfo()
             }
         }
     }
 
     function changeHeadPortrait() {
-        for (var i = 0; i < manuscripts["netizenInfo"].length; i++) {
-            if (manuscripts["netizenInfo"][i]["id"] == mainPage.personalPage.netizen["id"]) {
-                manuscripts["netizenInfo"][i]["headPortrait"] = mainPage.personalPage.netizen["headportrait"]
+        for (var i = 0; i < manuscripts.length; i++) {
+            if (manuscripts[i]["netizen"]["id"] === mainPage.personalPage.netizen["id"]) {
+                manuscripts[i]["netizen"]["headPortrait"] = mainPage.personalPage.netizen["headportrait"]
+                getVideoInfo()
             }
         }
     }
@@ -29,12 +31,13 @@ Item {
     //获取数据
     function getVideoInfo() {
         videoModel.clear()
-        for (var i = 0; i < manuscripts["manuscriptInfo"].length; i += 7) {
+        console.log(manuscripts.length)
+        for (var i = 0; i < manuscripts.length; i += 7) {
             let grid = []
-            for (var j = i+1; j < i+7 && j < manuscripts["manuscriptInfo"].length; j++) {
-                grid.push({videoUrl: manuscripts["manuscriptInfo"][j]["videoAddress"], videoCover: manuscripts["manuscriptInfo"][j]["cover"], playNum: "435", commentNum: "5464", duration: "1:30", videoTitle: manuscripts["manuscriptInfo"][j]["title"], authorName: manuscripts["netizenInfo"][j]["nickname"]})
+            for (var j = i+1; j < i+7 && j < manuscripts.length; j++) {
+                grid.push({videoUrl: manuscripts[j]["manuscript"]["videoAddress"], videoCover: manuscripts[j]["manuscript"]["cover"], playNum: "435", commentNum: "5464", duration: "1:30", videoTitle: manuscripts[j]["manuscript"]["title"], authorName: manuscripts[j]["netizen"]["nickname"]})
             }
-            videoModel.append({bigVideoUrl: manuscripts["manuscriptInfo"][i]["videoAddress"], bigVideoCover: manuscripts["manuscriptInfo"][i]["cover"], videoUrls: grid, playNum: "435", commentNum: "5464", duration: "1:30", videoTitle: manuscripts["manuscriptInfo"][i]["title"]});
+            videoModel.append({bigVideoUrl: manuscripts[i]["manuscript"]["videoAddress"], bigVideoCover: manuscripts[i]["manuscript"]["cover"], videoUrls: grid, playNum: "435", commentNum: "5464", duration: "1:30", videoTitle: manuscripts[i]["manuscript"]["title"]});
         }
     }
 
@@ -268,8 +271,8 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            var flag = isFocus(manuscripts["netizenInfo"][videoListView.currentIndex*7]["id"])
-                            stackView.push(watchVideo, {videoSource: bigVideoUrl, manuscript: manuscripts["manuscriptInfo"][videoListView.currentIndex*7], netizen: manuscripts["netizenInfo"][videoListView.currentIndex*7], flag: flag})
+                            var flag = isFocus(manuscripts[videoListView.currentIndex*7]["netizen"]["id"])
+                            stackView.push(watchVideo, {videoSource: bigVideoUrl, manuscript: manuscripts[videoListView.currentIndex*7]["manuscript"], netizen: manuscripts[videoListView.currentIndex*7]["netizen"], flag: flag})
                             mainPage.visible = false
                             stackView.visible = true
                         }
@@ -406,8 +409,8 @@ Item {
                                 console.log("grid view index:-------" + index)
                                 videoView.currentIndex = index
                                 var i = videoListView.currentIndex*7+videoView.currentIndex+1
-                                var flag = isFocus(manuscripts["netizenInfo"][i]["id"])
-                                stackView.push(watchVideo, {videoSource: videoUrl, manuscript: manuscripts["manuscriptInfo"][i], netizen: manuscripts["netizenInfo"][i], flag: flag})
+                                var flag = isFocus(manuscripts[i]["netizen"]["id"])
+                                stackView.push(watchVideo, {videoSource: videoUrl, manuscript: manuscripts[i]["manuscript"], netizen: manuscripts[i]["netizen"], flag: flag})
                                 mainPage.visible = false
                                 stackView.visible = true
                             }
@@ -452,9 +455,9 @@ Item {
         running: false
         onTriggered: {
             busyDownRefresh.visible = false
-
-            //下面增加数据
-
+            //重新获取数据
+            manuscripts = (videoSocialControl.getSomeVideos())["manuscriptInfo"]
+            getVideoInfo()
         }
     }
 

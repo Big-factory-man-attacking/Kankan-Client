@@ -16,7 +16,7 @@ extern "C" {
     #include <stdlib.h>
 }
 #define MAXSIZE 1024
-
+#define MAXLINE 4096
 
 
 TcpSocket::TcpSocket()
@@ -46,9 +46,9 @@ int TcpSocket::send(nlohmann::json js)
 
     std::string str = js.dump();
     char* c =  str.data();
-    std::cout << "\nsend:" << strlen(c) << "\n" << c << std::endl;
     int n = write(m_sockfd, c, strlen(c));
 
+    std::cout << "\nsend:" << strlen(c) << "\n" << c << std::endl;
     return n;
 }
 
@@ -81,9 +81,32 @@ nlohmann::json TcpSocket::receive()
             rs = 1;// 需要再次读取
         s += recvline;
     }
-
     nlohmann::json json;
     json = nlohmann::json::parse(s);
-    std::cout << "\nreceive:" << json.dump() << std::endl;
+    std::cout << "\nreceive:" << json.dump(4) << std::endl;
     return json;
+}
+
+int TcpSocket::sendVideo(std::string address)
+{
+    FILE* fq;
+    if( ( fq = fopen(address.c_str(),"rb") ) == nullptr ){
+        printf("File open.\n");
+        close(m_sockfd);
+        exit(1);
+    }
+
+    int len, n;
+    char buffer[MAXLINE];
+    bzero(buffer,sizeof(buffer));
+    while(!feof(fq)){
+        len = fread(buffer, 1, sizeof(buffer), fq);
+        if((n = write(m_sockfd, buffer, len)) <= 0){
+            printf("write error.\n");
+            break;
+        }
+    }
+    printf("n = %d", n);
+    fclose(fq);
+    return n;
 }

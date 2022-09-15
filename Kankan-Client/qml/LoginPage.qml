@@ -152,7 +152,7 @@ Rectangle {
                     errorText.visible = true
                     passwordTimer.running = true
                 } else {
-                    mainPage.homePage.manuscripts = videoSocialControl.getSomeVideos()
+                    mainPage.homePage.manuscripts = (videoSocialControl.getSomeVideos())["manuscriptInfo"]
                     mainPage.personalPage.headPortrait = mainPage.personalPage.netizen["headportrait"]
                     mainPage.homePage.getVideoInfo()
                     mainPage.visible = true
