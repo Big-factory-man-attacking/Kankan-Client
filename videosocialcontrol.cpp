@@ -13,7 +13,7 @@ extern "C" {
 
 using json = nlohmann::json;
 
-VideoSocialControl::VideoSocialControl()
+VideoSocialControl::VideoSocialControl(): m_rtmp(new RtmpClient)
 {
     m_socket.Connect();
 }
@@ -21,17 +21,12 @@ VideoSocialControl::VideoSocialControl()
 //注册
 void VideoSocialControl::registerAccount(QString password, QString nickname)
 {
-    //利用boost/uuid库生成uuid
-    boost::uuids::random_generator gen;
-    boost::uuids::uuid  uid = gen();
-
-    std::string id = to_string(uid);
-
+    std::cout << "-------注册帐号------\n";
     json js;
     js["type"] = "register";
 
     json data;
-    data["id"] = id;
+//    data["id"] = id;
     data["password"] = password.toStdString();
     data["nickname"] = nickname.toStdString();
     js["data"] = data;
@@ -62,6 +57,7 @@ QJsonObject VideoSocialControl::transition(json js)
 //登录
 QJsonObject VideoSocialControl::login(QString id, QString key)
 {
+    std::cout << "-------登录帐号------\n";
     nlohmann::json js;
     js["type"] = "login";
 
@@ -77,6 +73,7 @@ QJsonObject VideoSocialControl::login(QString id, QString key)
 
 QJsonObject VideoSocialControl::getSomeVideos()
 {
+    std::cout << "-------获取网民所有稿件------\n";
     nlohmann::json js;
     js["type"] = "getSomeVideos";
     nlohmann::json data;
@@ -88,17 +85,48 @@ QJsonObject VideoSocialControl::getSomeVideos()
     return transition(js);
 }
 
-QJsonObject VideoSocialControl::loadVideo(QString id)
+QJsonObject VideoSocialControl::loadVideo(QString manuscriptId, QString videoId)
 {
+    std::cout << "-------播放视频------\n";
     nlohmann::json js;
     js["type"] = "loadVideo";
     nlohmann::json data;
-    data["id"] = id.toStdString();
+    data["id"] = manuscriptId.toStdString();
+    js["data"] = data;
+
+    m_socket.send(js);
+
+    js = m_socket.receive();    //从系统服务器中获取到稿件相关的信息
+
+    std::string videoUrl = js["videoAddress"];
+    std::thread pullThread(&RtmpClient::pullStreaming, m_rtmp.get(), videoUrl, videoId.toStdString());   //单独创建一个线程，让rtmp流媒体服务器拉流
+    pullThread.detach();
+
+   // std::string videoId = js["videoId"];
+    std::string videoPath = "file:///tmp/" + videoId.toStdString() + ".flv";   //这个视频地址为客户端拉流时缓存到客户端的一个视频
+    js["videoAddress"] = videoPath;
+    std::cout << js.dump(4) << std::endl;
+    return transition(js);
+}
+
+void VideoSocialControl::closeConnect()
+{
+    std::cout << "拉流断开！！！！！\n";
+    m_rtmp->closeConnect();   //客户端与流媒体服务器断开连接
+}
+
+QJsonObject VideoSocialControl::getVideoAndManuscriptId()
+{
+    std::cout << "-------生成视频Id和稿件Id------\n";
+    nlohmann::json js;
+    js["type"] = "genVideoIdAndManuscriptId";
+    nlohmann::json data;
     js["data"] = data;
 
     m_socket.send(js);
 
     js = m_socket.receive();
+
     return transition(js);
 }
 
@@ -207,68 +235,92 @@ std::pair<std::string, std::string> VideoSocialControl::changeVideoFile(std::vec
 }
 
 
-
-QJsonObject VideoSocialControl::publishManuscript(QString description, QString title, QString label,
-                                     QString subarea, QString isOriginal, QString cover, QString date,
-                                     QString netizenId, QString videoAddress)
+void VideoSocialControl::publishManuscript(QJsonObject publishInfo)
 {
-    std::string s = videoAddress.toStdString();
-    std::string videoName;
-    for (int i = s.size()-1; i >= 0; i--) {
-        if (s[i] == '/') {
-            videoName = s.substr(i+1, s.size()-i+1);
-            std::cout << videoName << std::endl;
-            break;
-        }
+    nlohmann::json js = getJsonFromJsonObject(publishInfo);
+    std::string videoId = js["videoId"];
+    std::string s = js["videoPath"];
+//    std::string videoName;
+//    for (int i = s.size()-1; i >= 0; i--) {
+//        if (s[i] == '/') {
+//            videoName = s.substr(i+1, s.size()-i+1);
+//            std::cout << videoName << std::endl;
+//            break;
+//        }
+//    }
+
+
+    convertVideoFormat(s);   //转换视频格式，将mp4,mkv,avi,mpg转换为flv
+    std::cout << s << std::endl;
+    //还需要修改：创建一个线程执行
+    if (m_rtmp->pushStreaming(videoId, s) < 0) {
+        std::cerr << "rtmp推流失败，发布稿件结束!\n";
+        return;
     }
-    FILE* fp;
-    if( ( fp = fopen(s.c_str(),"rb") ) == nullptr ){
-        printf("File open.\n");
-        exit(1);
-    }
-    fseek(fp, 0, SEEK_END);
-    long nlen = ftell(fp);
-    fseek(fp, 0, 0);
-    fclose(fp);
-    printf("%d\n", nlen);
-
-    nlohmann::json js;
-    js["type"] = "sendVideo";
-    nlohmann::json data;
-    data["videoName"] = videoName;
-    data["videoLen"] = std::to_string(nlen);
-    js["data"] = data;
-    m_socket.send(js);
-    sleep(2);
-
-    m_socket.sendVideo(videoAddress.toStdString());
-
-    nlohmann::json address = m_socket.receive();
-//    std::cout << address.dump(4)<< std::endl;
 
     nlohmann::json m;
     nlohmann::json dat;
     m["type"] = "publishManuscript";
 
-    dat["description"] = description.toStdString();
-    dat["title"] = title.toStdString();
-    dat["label"] = label.toStdString();
-    dat["subarea"] = subarea.toStdString();
-    dat["isOriginal"] = isOriginal.toStdString();
-    dat["cover"] = cover.toStdString();
-    dat["date"] = date.toStdString();
-    dat["videoAddress"] = address["videoAddress"];
-    dat["netizenId"] = netizenId.toStdString();
+    dat["videoId"] = videoId;
+    dat["manuscriptId"] = js["manuscriptId"];
+    dat["description"] = js["description"];
+    dat["title"] = js["title"];
+    dat["label"] = js["label"];
+    dat["subarea"] = js["subarea"];
+    dat["isOriginal"] = js["isOriginal"];
+    dat["date"] = js["date"];
+    dat["cover"] = js["cover"];
+    dat["videoAddress"] = "rtmp://192.168.43.150:1936/live/" + videoId;
+    dat["netizenId"] = js["netizenId"];
 
     m["data"] = dat;
 
     m_socket.send(m);
-    js = m_socket.receive();
-    return transition(js);
+}
+
+void VideoSocialControl::convertVideoFormat(std::string &s)
+{
+    int i = s.size()-1;
+    for ( ; i >= 0; i--) {
+        if (s[i] == '.')
+           break;
+    }
+
+    std::string sub = s.substr(i+1, s.size()-i);
+    std::string newName = s.substr(0, i) + ".flv";
+    std::cout << sub << "    " << newName << std::endl;
+    std::string cmd;
+
+    if (sub == "flv") return;
+
+    if (sub == "mp4") {
+        cmd = "ffmpeg -i "+ s +" -vcodec copy -acodec copy -flvflags add_keyframe_index " + newName;
+        system(cmd.c_str());
+    } else if (sub == "mpg") {
+        cmd = "ffmpeg -i " + s + " " + newName;
+        system(cmd.c_str());
+    } else if (sub == "avi") {
+        cmd = "ffmpeg -i " + s + " -f flv "+ newName;
+        system(cmd.c_str());
+    } else if (sub == "mkv") {
+        cmd = "ffmpeg -i " + s + " -f flv "+ newName;
+        system(cmd.c_str());
+    }
+
+    s = newName;
+}
+
+void VideoSocialControl::publishThread(QJsonObject publishInfo)
+{
+    std::cout << "-------发布稿件------\n";
+    std::thread publish(&VideoSocialControl::publishManuscript, this, publishInfo);
+    publish.detach();
 }
 
 void VideoSocialControl::focusOn(QString fanId, QString followerId, QString followerNickname)
 {
+    std::cout << "-------关注up主------\n";
     nlohmann::json js;
     js["type"] = "focusOn";
 
@@ -283,6 +335,7 @@ void VideoSocialControl::focusOn(QString fanId, QString followerId, QString foll
 
 void VideoSocialControl::takeOff(QString fanId, QString followerId)
 {
+    std::cout << "-------取消关注------\n";
     nlohmann::json js;
     js["type"] = "takeOff";
 
@@ -297,6 +350,7 @@ void VideoSocialControl::takeOff(QString fanId, QString followerId)
 
 void VideoSocialControl::modifyHeadportrait(const QString &netizenId, const QString &newHeadportrait)
 {
+    std::cout << "-------修改头像------\n";
     nlohmann::json js;
     js["type"] = "modifyHeadportrait";
 
@@ -310,6 +364,7 @@ void VideoSocialControl::modifyHeadportrait(const QString &netizenId, const QStr
 
 void VideoSocialControl::modifyNickname(const QString &netizenId, const QString &newNickname)
 {
+    std::cout << "-------修改网名------\n";
     nlohmann::json js;
     js["type"] = "modifyNickname";
 
@@ -323,6 +378,7 @@ void VideoSocialControl::modifyNickname(const QString &netizenId, const QString 
 
 bool VideoSocialControl::modifyPassword(const QString &netizenId, const QString &oldPassword, const QString &newPassword)
 {
+    std::cout << "-------修改密码------\n";
     nlohmann::json js;
     js["type"] = "modifyPassword";
 
@@ -352,6 +408,7 @@ nlohmann::json VideoSocialControl::getJsonFromJsonObject(QJsonObject qjson)
 
 void VideoSocialControl::modifyManuscriptInfo(const QString &netizenId, QJsonObject newManuscriptInfo)
 {
+    std::cout << "-------修改稿件信息------\n";
     nlohmann::json js;
     js["type"] = "modifyManuscriptInfo";
 
@@ -365,6 +422,7 @@ void VideoSocialControl::modifyManuscriptInfo(const QString &netizenId, QJsonObj
 
 void VideoSocialControl::deleteManuscript(const QString &netizenId, const QString &manuscriptId)
 {
+    std::cout << "-------删除稿件------\n";
     nlohmann::json js;
     js["type"] = "deleteManuscript";
 
@@ -378,6 +436,7 @@ void VideoSocialControl::deleteManuscript(const QString &netizenId, const QStrin
 
 void VideoSocialControl::commentManuscript(const QString &netizenId, const QString &manuscriptId, QString &text)
 {
+    std::cout << "-------发布评论------\n";
     nlohmann::json js;
     js["type"] = "commentManuscript";
 
@@ -392,6 +451,7 @@ void VideoSocialControl::commentManuscript(const QString &netizenId, const QStri
 
 void VideoSocialControl::deleteComment(const QString &manuscriptId, const QString &commentId)
 {
+    std::cout << "-------删除评论------\n";
     nlohmann::json js;
     js["type"] = "deleteComment";
 

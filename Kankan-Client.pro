@@ -7,6 +7,7 @@ LIBS += -lmariadbcpp
 
 SOURCES += \
         main.cpp \
+        rtmpclient.cpp \
         tcpsocket.cpp \
         videosocialcontrol.cpp
 
@@ -49,6 +50,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    rtmpclient.h \
     tcpsocket.h \
     videosocialcontrol.h
 
@@ -75,3 +77,6 @@ DISTFILES += \
     qml/TimeDialog.qml \
     qml/WatchVideo.qml \
     qml/main.qml
+
+unix|win32: LIBS += -lrtmp
+unix|win32: LIBS += -lpthread

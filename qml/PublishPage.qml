@@ -9,6 +9,8 @@ Item {
     id: publishPage
     anchors.fill: parent
     property alias video: video
+    property var publishInfo: ({})
+    property var manuscript: ({})
 
     ColumnLayout {
         id: publishColumn
@@ -485,9 +487,36 @@ Item {
                         }
                         var cover = "https://img1.baidu.com/it/u=848097428,2094753496&fm=253&fmt=auto&app=138&f=PNG?w=838&h=500"
 
-                        //传输数据给稿件构造函数
-                        var manuscript = videoSocialControl.publishManuscript(inforTextA.text, titleText.text, labelText.text, subareaBox.displayText, isOrginal, cover, "2022-9-12", mainPage.personalPage.netizen["id"], video.source.toString().slice(7))
+                        var js = videoSocialControl.getVideoAndManuscriptId()
+                        //将传输给稿件构造函数的数据转换为json
+                        publishInfo["videoId"] = js["videoId"]
+                        publishInfo["manuscriptId"] = js["manuscriptId"]
+                        publishInfo["description"] = inforTextA.text
+                        publishInfo["title"] = titleText.text
+                        publishInfo["label"] = labelText.text
+                        publishInfo["subarea"] = subareaBox.displayText
+                        publishInfo["isOriginal"] = isOrginal
+                        publishInfo["cover"] = cover
+                        publishInfo["date"] = "2022-9-12"
+                        publishInfo["netizenId"] = mainPage.personalPage.netizen["id"]
+                        publishInfo["videoPath"] = video.source.toString().slice(7)
+
+                        videoSocialControl.publishThread(publishInfo)
+
+                        //构建稿件信息
+                        manuscript["manuscriptId"] = js["manuscriptId"]
+                        manuscript["description"] = inforTextA.text
+                        manuscript["title"] = titleText.text
+                        manuscript["label"] = labelText.text
+                        manuscript["subarea"] = subareaBox.displayText
+                        manuscript["isOriginal"] = isOrginal
+                        manuscript["cover"] = cover
+                        manuscript["date"] = "2022-9-12"
+                        manuscript["comments"] = {}
+                        manuscript["videoId"] = js["videoId"]
+
                         mainPage.personalPage.netizen["videos"].push(manuscript)
+
                         mainPage.personalPage.getNetizenInfo()
                         inforTextA.text = ""
                         titleText.text = ""

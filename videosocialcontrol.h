@@ -9,6 +9,7 @@
 #include <QtQml>
 #include <QJsonObject>
 #include "tcpsocket.h"
+#include "rtmpclient.h"
 
 class VideoSocialControl : public QObject
 {
@@ -33,7 +34,12 @@ public:
     Q_INVOKABLE QJsonObject getSomeVideos();
 
     // 用户选择了某个稿件进行观看，加载稿件的完整信息
-    Q_INVOKABLE QJsonObject loadVideo(QString id);
+    Q_INVOKABLE QJsonObject loadVideo(QString manuscriptId, QString videoId);
+
+    Q_INVOKABLE void closeConnect();
+
+    //获取video id
+    Q_INVOKABLE QJsonObject getVideoAndManuscriptId();
 
     // 合并视频,返回id、合并后的视频路径
     std::pair<std::string, std::string> mergeVideoFiles(std::vector<std::string> videoFiles);
@@ -42,9 +48,10 @@ public:
     std::pair<std::string, std::string> changeVideoFile(std::vector<std::string> videoFiles);
 
     // 生成稿件
-    Q_INVOKABLE QJsonObject publishManuscript(QString description, QString title, QString label,
-                     QString subarea, QString isOriginal, QString cover, QString date,
-                     QString netizenId, QString videoAddress);
+    void publishManuscript(QJsonObject publishInfo);
+
+    //创建线程来生成稿件
+    Q_INVOKABLE void publishThread(QJsonObject publishInfo);
 
     // 关注
     // fanId:当前使用者id
@@ -80,6 +87,9 @@ public:
 
 private:
     TcpSocket m_socket;
+    std::unique_ptr<RtmpClient> m_rtmp;
+
+    void convertVideoFormat(std::string &s);   //将其他格式的视频转为flv格式
 };
 
 #endif // VIDEOSOCIALCONTROL_H

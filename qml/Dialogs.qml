@@ -29,7 +29,7 @@ Item {
     FileDialog{
         id: fileVideoDialog
         title: "请选择视频"
-        nameFilters: ["Video files (*.mkv *.avi)"]
+        nameFilters: ["Video files (*.mkv *.avi *.flv *.mp4 *.mpg)"]
 
         onAccepted: {
             console.log(fileVideoDialog.currentFile)

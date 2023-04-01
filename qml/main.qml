@@ -11,6 +11,7 @@ ApplicationWindow {
     visible: true
     color: "white"
     title: "Kankan"
+
     LoginPage {
         id: loginPage
         anchors.fill: parent
@@ -81,10 +82,10 @@ ApplicationWindow {
             height: stackView.height
         }
     }
-    Dialogs {
-        id: dialogs
-    }
     VideoSocialControl{
         id: videoSocialControl
     }
+    Dialogs {
+        id: dialogs
+    }    
 }

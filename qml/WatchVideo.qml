@@ -38,7 +38,7 @@ Rectangle {
 
     function init() {
         //重新加载当前稿件
-        manuscript = videoSocialControl.loadVideo(manuscript["id"])
+        manuscript = videoSocialControl.loadManuscript(manuscript["id"])
         //重新加载评论
         getComment()
 
@@ -94,7 +94,7 @@ Rectangle {
             focus: true
             fillMode: VideoOutput.PreserveAspectFit
             onSourceChanged: {
-                playBut.clicked()
+             //   playBut.clicked()
                 vieoTimer.running = true
             }
             MouseArea {
@@ -107,10 +107,11 @@ Rectangle {
             }
             Timer {
                 id: vieoTimer
-                interval: 500
+                interval: 2000
                 running: false
                 repeat: false
                 onTriggered: {
+                    playBut.clicked()
                     totalTime = setTime(video.duration)
                 }
             }
@@ -134,6 +135,7 @@ Rectangle {
                         opacity: 0
                     }
                     onClicked: {
+                        videoSocialControl.closeConnect();
                         if (stackView.depth === 1) {
                             console.log(stackView.depth)
                             mainPage.visible = true
@@ -155,6 +157,7 @@ Rectangle {
                         opacity: 0
                     }
                     onClicked: {
+                        videoSocialControl.closeConnect();
                         stackView.visible = false
                         mainPage.visible = true
                         stackView.clear()

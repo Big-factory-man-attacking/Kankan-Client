@@ -272,7 +272,10 @@ Item {
                         anchors.fill: parent
                         onClicked: {
                             var flag = isFocus(manuscripts[videoListView.currentIndex*7]["netizen"]["id"])
-                            stackView.push(watchVideo, {videoSource: bigVideoUrl, manuscript: manuscripts[videoListView.currentIndex*7]["manuscript"], netizen: manuscripts[videoListView.currentIndex*7]["netizen"], flag: flag})
+                            var _manuscript = videoSocialControl.loadVideo(manuscripts[videoListView.currentIndex*7]["manuscript"]["id"], manuscripts[videoListView.currentIndex*7]["manuscript"]["videoId"])
+                                                        stackView.push(watchVideo, {videoSource: _manuscript["videoAddress"], manuscript: manuscripts[videoListView.currentIndex*7]["manuscript"], netizen: manuscripts[videoListView.currentIndex*7]["netizen"], flag: flag})
+
+                            console.log(_manuscript["videoAddress"])
                             mainPage.visible = false
                             stackView.visible = true
                         }
@@ -410,7 +413,8 @@ Item {
                                 videoView.currentIndex = index
                                 var i = videoListView.currentIndex*7+videoView.currentIndex+1
                                 var flag = isFocus(manuscripts[i]["netizen"]["id"])
-                                stackView.push(watchVideo, {videoSource: videoUrl, manuscript: manuscripts[i]["manuscript"], netizen: manuscripts[i]["netizen"], flag: flag})
+                                var _manuscript = videoSocialControl.loadVideo(manuscripts[i]["manuscript"]["id"], manuscripts[i]["manuscript"]["videoId"])
+                                stackView.push(watchVideo, {videoSource: _manuscript["videoAddress"], manuscript: manuscripts[i]["manuscript"], netizen: manuscripts[i]["netizen"], flag: flag})
                                 mainPage.visible = false
                                 stackView.visible = true
                             }
