@@ -85,6 +85,10 @@ public:
 
     Q_INVOKABLE void deleteComment(const QString& manuscriptId, const QString& commentId);
 
+    //加载稿件信息
+    Q_INVOKABLE QJsonObject loadManuscript(QString id);
+
+
 private:
     TcpSocket m_socket;
     std::unique_ptr<RtmpClient> m_rtmp;

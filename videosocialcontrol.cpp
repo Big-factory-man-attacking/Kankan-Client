@@ -99,11 +99,10 @@ QJsonObject VideoSocialControl::loadVideo(QString manuscriptId, QString videoId)
     js = m_socket.receive();    //从系统服务器中获取到稿件相关的信息
 
     std::string videoUrl = js["videoAddress"];
-    std::thread pullThread(&RtmpClient::pullStreaming, m_rtmp.get(), videoUrl, videoId.toStdString());   //单独创建一个线程，让rtmp流媒体服务器拉流
+    std::thread pullThread(&RtmpClient::pullStreaming, m_rtmp.get(), videoUrl, videoId.toStdString());   //单独创建一个线程，从rtmp流媒体服务器拉流
     pullThread.detach();
 
-   // std::string videoId = js["videoId"];
-    std::string videoPath = "file:///tmp/" + videoId.toStdString() + ".flv";   //这个视频地址为客户端拉流时缓存到客户端的一个视频
+    std::string videoPath = "file:///tmp/testrtmp.flv"/* + videoId.toStdString() + ".flv"*/;   //这个视频地址为客户端拉流时缓存到客户端的一个视频
     js["videoAddress"] = videoPath;
     std::cout << js.dump(4) << std::endl;
     return transition(js);
@@ -252,7 +251,6 @@ void VideoSocialControl::publishManuscript(QJsonObject publishInfo)
 
     convertVideoFormat(s);   //转换视频格式，将mp4,mkv,avi,mpg转换为flv
     std::cout << s << std::endl;
-    //还需要修改：创建一个线程执行
     if (m_rtmp->pushStreaming(videoId, s) < 0) {
         std::cerr << "rtmp推流失败，发布稿件结束!\n";
         return;
@@ -462,5 +460,21 @@ void VideoSocialControl::deleteComment(const QString &manuscriptId, const QStrin
 
     m_socket.send(js);
 }
+
+QJsonObject VideoSocialControl::loadManuscript(QString id)
+{
+    nlohmann::json js;
+    js["type"] = "loadManuscript";
+    nlohmann::json data;
+    data["manuscriptId"] = id.toStdString();
+    js["data"] = data;
+
+    m_socket.send(js);
+
+    js = m_socket.receive();
+
+    return transition(js);
+}
+
 
 

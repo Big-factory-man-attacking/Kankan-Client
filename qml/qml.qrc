@@ -6,7 +6,6 @@
         <file>CommentManger.qml</file>
         <file>Dialogs.qml</file>
         <file>EditManuscript.qml</file>
-        <file>FullScreen.qml</file>
         <file>HomePage.qml</file>
         <file>LoginPage.qml</file>
         <file>main.qml</file>

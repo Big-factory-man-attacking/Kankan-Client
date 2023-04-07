@@ -269,10 +269,10 @@ Rectangle {
                 onValueChanged: {
                     currentTime=setTime(value)
                 }
-//                onMoved: {
-//                   video.seek(value)
+                onMoved: {
+                   video.seek(value)
 
-//                }
+                }
             }
             Text {
                 id: playbackTime

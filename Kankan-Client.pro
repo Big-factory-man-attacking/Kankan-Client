@@ -19,7 +19,6 @@ resources.files = qml/main.qml \
     qml/Dialogs.qml \
     qml/Delegate.qml\
     qml/EditManuscript.qml \
-    qml/FullScreen.qml \
     qml/HomePage.qml \
     qml/LoginPage.qml \
     qml/MainPage.qml \

@@ -275,8 +275,11 @@ Item {
                             var _manuscript = videoSocialControl.loadVideo(manuscripts[videoListView.currentIndex*7]["manuscript"]["id"], manuscripts[videoListView.currentIndex*7]["manuscript"]["videoId"])
                                                         stackView.push(watchVideo, {videoSource: _manuscript["videoAddress"], manuscript: manuscripts[videoListView.currentIndex*7]["manuscript"], netizen: manuscripts[videoListView.currentIndex*7]["netizen"], flag: flag})
 
+//                            watchVideoPage.video.source = _manuscript["videoAddress"]
+//                            watchVideoPage.video.play()
                             console.log(_manuscript["videoAddress"])
                             mainPage.visible = false
+                      //      watchVideoPage.visible = true
                             stackView.visible = true
                         }
                     }
