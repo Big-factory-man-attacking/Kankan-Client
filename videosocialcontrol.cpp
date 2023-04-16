@@ -98,12 +98,12 @@ QJsonObject VideoSocialControl::loadVideo(QString manuscriptId, QString videoId)
 
     js = m_socket.receive();    //从系统服务器中获取到稿件相关的信息
 
-    std::string videoUrl = js["videoAddress"];
-    std::thread pullThread(&RtmpClient::pullStreaming, m_rtmp.get(), videoUrl, videoId.toStdString());   //单独创建一个线程，从rtmp流媒体服务器拉流
-    pullThread.detach();
+//    std::string videoUrl = js["videoAddress"];
+//    std::thread pullThread(&RtmpClient::pullStreaming, m_rtmp.get(), videoUrl, videoId.toStdString());   //单独创建一个线程，从rtmp流媒体服务器拉流
+//    pullThread.detach();
 
-    std::string videoPath = "file:///tmp/testrtmp.flv"/* + videoId.toStdString() + ".flv"*/;   //这个视频地址为客户端拉流时缓存到客户端的一个视频
-    js["videoAddress"] = videoPath;
+//    std::string videoPath = "file:///tmp/" + videoId.toStdString() + ".flv";   //这个视频地址为客户端拉流时缓存到客户端的一个视频
+//    js["videoAddress"] = videoPath;
     std::cout << js.dump(4) << std::endl;
     return transition(js);
 }
@@ -239,22 +239,18 @@ void VideoSocialControl::publishManuscript(QJsonObject publishInfo)
     nlohmann::json js = getJsonFromJsonObject(publishInfo);
     std::string videoId = js["videoId"];
     std::string s = js["videoPath"];
-//    std::string videoName;
-//    for (int i = s.size()-1; i >= 0; i--) {
-//        if (s[i] == '/') {
-//            videoName = s.substr(i+1, s.size()-i+1);
-//            std::cout << videoName << std::endl;
-//            break;
-//        }
-//    }
 
-
-    convertVideoFormat(s);   //转换视频格式，将mp4,mkv,avi,mpg转换为flv
+    std::string newVideo = convertVideoFormat(s);   //转换视频格式，将mp4,mkv,avi,mpg转换为flv
     std::cout << s << std::endl;
     if (m_rtmp->pushStreaming(videoId, s) < 0) {
         std::cerr << "rtmp推流失败，发布稿件结束!\n";
         return;
     }
+    if (newVideo.size() > 0) {
+        std::string cmd = "rm -f " + newVideo;
+        system(cmd.c_str());
+    }
+
 
     nlohmann::json m;
     nlohmann::json dat;
@@ -277,7 +273,7 @@ void VideoSocialControl::publishManuscript(QJsonObject publishInfo)
     m_socket.send(m);
 }
 
-void VideoSocialControl::convertVideoFormat(std::string &s)
+std::string VideoSocialControl::convertVideoFormat(std::string &s)
 {
     int i = s.size()-1;
     for ( ; i >= 0; i--) {
@@ -290,7 +286,7 @@ void VideoSocialControl::convertVideoFormat(std::string &s)
     std::cout << sub << "    " << newName << std::endl;
     std::string cmd;
 
-    if (sub == "flv") return;
+    if (sub == "flv") return nullptr;
 
     if (sub == "mp4") {
         cmd = "ffmpeg -i "+ s +" -vcodec copy -acodec copy -flvflags add_keyframe_index " + newName;
@@ -307,6 +303,7 @@ void VideoSocialControl::convertVideoFormat(std::string &s)
     }
 
     s = newName;
+    return newName;
 }
 
 void VideoSocialControl::publishThread(QJsonObject publishInfo)

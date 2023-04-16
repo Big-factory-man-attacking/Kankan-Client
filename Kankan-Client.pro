@@ -7,6 +7,7 @@ LIBS += -lmariadbcpp
 
 SOURCES += \
         main.cpp \
+        mdkplayer.cpp \
         rtmpclient.cpp \
         tcpsocket.cpp \
         videosocialcontrol.cpp
@@ -49,6 +50,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    mdkplayer.h \
     rtmpclient.h \
     tcpsocket.h \
     videosocialcontrol.h
@@ -79,3 +81,4 @@ DISTFILES += \
 
 unix|win32: LIBS += -lrtmp
 unix|win32: LIBS += -lpthread
+unix|win32: LIBS += -lmdk

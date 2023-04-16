@@ -93,7 +93,7 @@ private:
     TcpSocket m_socket;
     std::unique_ptr<RtmpClient> m_rtmp;
 
-    void convertVideoFormat(std::string &s);   //将其他格式的视频转为flv格式
+    std::string convertVideoFormat(std::string &s);   //将其他格式的视频转为flv格式
 };
 
 #endif // VIDEOSOCIALCONTROL_H

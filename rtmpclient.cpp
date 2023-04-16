@@ -213,7 +213,7 @@ void RtmpClient::pullStreaming(std::string videoUrl, std::string videoId)
     while (RTMP_IsConnected(m_rtmp)) {
         char sBuf[4096] = {0};
         int bytes = RTMP_Read(m_rtmp, sBuf, sizeof(sBuf));
-        printf("RTMP_Read() ret:[%d] \n", bytes);
+  //      printf("RTMP_Read() ret:[%d] \n", bytes);
 
         if (bytes <= 0) break;
 
